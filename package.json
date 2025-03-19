@@ -4,9 +4,20 @@
   "description": "一个适配jenkins的客户端,集成后续平台功能的开发",
   "main": "index.js",
   "scripts": {
+    "start": "cd src && node main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "jenkins",
+    "client"
+  ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.8.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jenkins": "^1.1.0",
+    "ws": "^8.18.1"
+  }
 }
