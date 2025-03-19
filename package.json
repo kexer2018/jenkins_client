@@ -1,0 +1,12 @@
+{
+  "name": "jenkins-client",
+  "version": "0.0.1",
+  "description": "一个适配jenkins的客户端,集成后续平台功能的开发",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
