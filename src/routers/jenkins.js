@@ -1,52 +1,23 @@
-const express = require('express');
-const { createJob, buildJob, getJobLogs } = require('../api/jenkins');
+const { Router } = require('express');
+const router = Router();
+const jenkinsCtrl = require('../controllers/jenkins.controller');
 
-const router = express.Router();
+router.get('/info', jenkinsCtrl.getJenkinsinfo);
+router.get('/build/info', jenkinsCtrl.getBuildInfo);
+router.post('/build/stop', jenkinsCtrl.stopBuild);
+router.post('/build/term', jenkinsCtrl.termBuild);
 
-// 创建 Jenkins Pipeline
-router.post('/pipeline', async (req, res) => {
-	const { jobName } = req.body;
-	const jenkinsfile = `
-pipeline {
-    agent any
-    stages {
-        stage('Build') {
-            steps { echo 'Building...' }
-        }
-        stage('Deploy') {
-            steps { echo 'Deploying...' }
-        }
-    }
-}`;
+router.post('/job', jenkinsCtrl.createJob);
+router.post('/job/build', jenkinsCtrl.jobBuild);
+router.get('/job/list', jenkinsCtrl.getJobList);
+router.get('/job/config/:name', jenkinsCtrl.getJobConfig);
+router.get('/job/:name', jenkinsCtrl.getJobInfo);
+router.get('/job/check/:name', jenkinsCtrl.checkExistsJob);
+router.delete('/job/:name', jenkinsCtrl.deleteJob);
+router.put('/job/:name', jenkinsCtrl.updateEnableJob);
 
-	try {
-		await createJob(jobName, jenkinsfile);
-		res.json({ message: 'Pipeline created' });
-	} catch (error) {
-		res.status(500).json({ error: error.message });
-	}
-});
-
-// 触发 Jenkins Job
-router.post('/pipeline/:jobName/build', async (req, res) => {
-	const { jobName } = req.params;
-	try {
-		await buildJob(jobName);
-		res.json({ message: 'Build triggered' });
-	} catch (error) {
-		res.status(500).json({ error: error.message });
-	}
-});
-
-// 获取 Jenkins 日志
-router.get('/pipeline/:jobName/logs', async (req, res) => {
-	const { jobName } = req.params;
-	try {
-		const log = await getJobLogs(jobName);
-		res.send(log);
-	} catch (error) {
-		res.status(500).json({ error: error.message });
-	}
-});
+// router.get('/queue/list', jenkinsCtrl.getQueueList);
+// router.get('/queue/:id', jenkinsCtrl.getQueueInfo);
+// router.delete('/queue/:id', jenkinsCtrl.deleteQueueItem);
 
 module.exports = router;

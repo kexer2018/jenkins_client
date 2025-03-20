@@ -2,7 +2,7 @@
   "name": "jenkins-client",
   "version": "0.0.1",
   "description": "一个适配jenkins的客户端,集成后续平台功能的开发",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "start": "cd src && node main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -17,7 +17,14 @@
     "axios": "^1.8.3",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "fastest-validator": "^1.19.0",
     "jenkins": "^1.1.0",
-    "ws": "^8.18.1"
+    "ws": "^8.18.1",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/jenkins": "^1.0.2",
+    "@types/xml2js": "^0.4.14"
   }
 }

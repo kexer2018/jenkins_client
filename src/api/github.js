@@ -1,9 +1,9 @@
 const axios = require('axios');
-const { GITHUB_TOKEN } = require('../config/env');
+const { GIT_TOKEN, GIT_REGISTRY } = require('../config/env');
 
 const githubApi = axios.create({
-	baseURL: 'https://api.github.com',
-	headers: { Authorization: `token ${GITHUB_TOKEN}` },
+	baseURL: GIT_REGISTRY,
+	headers: { Authorization: `Bearer ${GIT_TOKEN}` },
 });
 
 // 获取用户所有仓库
@@ -12,7 +12,7 @@ async function getUserRepos() {
 		const response = await githubApi.get('/user/repos');
 		return response.data.map((repo) => repo.name);
 	} catch (error) {
-		throw new Error(error.response?.data?.message || 'Failed to fetch GitHub repositories');
+		throw new Error(error.response?.data?.message || 'Failed to fetch Git repositories');
 	}
 }
 

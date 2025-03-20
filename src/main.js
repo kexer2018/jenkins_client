@@ -1,17 +1,14 @@
 const express = require('express');
 const http = require('node:http');
-
 const router = require('./routers');
-
 const setupLogger = require('./utils/logger');
-const app = express();
 
+const app = express();
 app.use(express.json());
 
 async function appInit() {
 	const server = http.createServer(app);
 	setupLogger(server);
-
 	app.use('/api', router);
 }
 
