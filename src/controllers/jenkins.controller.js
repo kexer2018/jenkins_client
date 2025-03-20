@@ -1,6 +1,6 @@
 const { instance: jenkinsSer } = require('../services/jenkens.service');
-const check = require('../middleware/paramChecker');
-const { defaultXml } = require('../utils/xml');
+const check = require('../utils/param-check');
+const { defaultXml, generatePipelineXml } = require('../utils/xml');
 
 async function getJenkinsinfo(req, res) {
 	try {
@@ -62,6 +62,7 @@ async function createJob(req, res) {
 		xml: { type: 'string' },
 	};
 	const opts = req.body;
+	const xml = generatePipelineXml();
 	if (!opts.xml) {
 		opts.xml = defaultXml;
 	}
@@ -123,8 +124,8 @@ async function getJobInfo(req, res) {
 	const schema = {
 		name: { type: 'string' },
 	};
-	const name = req.params;
-	check(schema, name);
+	const { name } = req.params;
+	check(schema, { name });
 	try {
 		const config = await jenkinsSer.getJobInfo(name);
 		res.json(config);
