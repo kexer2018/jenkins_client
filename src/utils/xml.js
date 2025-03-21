@@ -100,7 +100,7 @@ async function updatePipelineXml(filePath, options) {
 const defaultXml = `
 <flow-definition plugin="workflow-job@2.40">
     <actions/>
-    <description>My first pipeline job</description>
+    <description>构建 App 模板工程，不要修改！！！使用时创建一个新的工程复制该工程，并在新的工程中修改及构建</description>
     <keepDependencies>false</keepDependencies>
     <properties>
         <hudson.model.ParametersDefinitionProperty>
@@ -140,7 +140,8 @@ const defaultXml = `
     </definition>
     <triggers/>
     <disabled>false</disabled>
-</flow-definition>`;
+</flow-definition>
+`;
 
 module.exports = {
 	parsePipelineXml,

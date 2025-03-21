@@ -62,7 +62,7 @@ async function createJob(req, res) {
 		xml: { type: 'string' },
 	};
 	const opts = req.body;
-	const xml = generatePipelineXml();
+	// const xml = generatePipelineXml();
 	if (!opts.xml) {
 		opts.xml = defaultXml;
 	}
@@ -178,6 +178,43 @@ async function updateEnableJob(req, res) {
 	}
 }
 
+async function getQueueList(req, res) {
+	try {
+		const list = await jenkinsSer.queueList();
+		res.json(list);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+}
+
+async function getItemInfo(req, res) {
+	const schema = {
+		id: { type: 'number' },
+	};
+	const { id } = req.params;
+	check(schema, { id });
+	try {
+		const itemInfo = await jenkinsSer.getItemInfo(id);
+		res.json(itemInfo);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+}
+
+async function cancelItem(req, res) {
+	const schema = {
+		id: { type: 'number' },
+	};
+	const { id } = req.params;
+	check(schema, { id });
+	try {
+		await jenkinsSer.cancelItem(id);
+		res.json({});
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+}
+
 module.exports = {
 	getJenkinsinfo,
 	getBuildInfo,
@@ -191,4 +228,7 @@ module.exports = {
 	checkExistsJob,
 	deleteJob,
 	updateEnableJob,
+	getQueueList,
+	getItemInfo,
+	cancelItem,
 };

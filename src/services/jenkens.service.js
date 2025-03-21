@@ -42,8 +42,43 @@ class JenkinsClient extends EventEmitter {
 		await this.jenkins.build.term(opts.name, opts.number);
 	}
 
+	async logStream(opts) {
+		const logger = this.jenkins.build.logStream(opts.name, opts.number);
+
+		logger.on('data', (text) => {
+			console.log(`[LOG] ${text}`);
+			this.emit('log', text);
+		});
+
+		logger.on('error', (err) => {
+			console.error('[ERROR]', err);
+			this.emit('error', err);
+		});
+
+		logger.on('end', () => {
+			console.log('[END] Log Stream Ended');
+			this.emit('end');
+		});
+
+		return logger;
+	}
+
 	async jobBuild(opts) {
-		await this.jenkins.job.build(opts);
+		try {
+			console.log(`Starting job: ${opts.name}`);
+			await this.jenkins.job.build(opts);
+
+			let buildNumber = null;
+			while (!buildNumber) {
+				await new Promise((resolve) => setTimeout(resolve, 1000));
+				const jobInfo = await this.getJobInfo(opts.name);
+				buildNumber = jobInfo.lastBuild?.number;
+			}
+			// 监听日志
+			this.logStream({ name: opts.name, number: buildNumber });
+		} catch (error) {
+			console.error('Job Build Error:', error);
+		}
 	}
 
 	async getJobConfig(name) {
@@ -72,6 +107,18 @@ class JenkinsClient extends EventEmitter {
 
 	async updateEnableJob(name, enable) {
 		enable ? await this.jenkins.job.enable(name) : await this.jenkins.job.disable(name);
+	}
+
+	async queueList() {
+		return await this.jenkins.queue.list();
+	}
+
+	async getItemInfo(id) {
+		return await this.jenkins.queue.item(id);
+	}
+
+	async cancelItem(id) {
+		await this.jenkins.queue.cancel(id);
 	}
 }
 
