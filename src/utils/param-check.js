@@ -6,15 +6,14 @@ function check(schema, data) {
 		throw new Error('data is required');
 	}
 
-	try {
-		const checker = v.compile(schema);
-		const result = checker(data);
-		if (!result) {
-			throw new Error(result[0].message);
-		}
-	} catch (err) {
-		console.error('API参数验证错误: ', err.message);
-		throw new Error(err.message);
+	const checker = v.compile(schema);
+	if (!checker || typeof checker !== 'function') {
+		throw new Error('Schema compilation failed. Invalid schema.');
+	}
+	const result = checker(data);
+	if (result !== true) {
+		const errorMessage = (Array.isArray(result) && result[0]?.message) || 'Validation failed';
+		throw new Error(errorMessage);
 	}
 }
 

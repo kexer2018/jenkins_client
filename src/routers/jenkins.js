@@ -2,6 +2,9 @@ const { Router } = require('express');
 const router = Router();
 const jenkinsCtrl = require('../controllers/jenkins.controller');
 
+// plugin
+router.get('/plugin/list', jenkinsCtrl.getPluginList);
+
 // build
 router.get('/info', jenkinsCtrl.getJenkinsinfo);
 router.get('/build/info', jenkinsCtrl.getBuildInfo);
@@ -24,6 +27,10 @@ router.get('/queue/:id', jenkinsCtrl.getItemInfo);
 router.delete('/queue/:id', jenkinsCtrl.cancelItem);
 
 // view
+router.get('/view/:name',jenkinsCtrl.getViewInfo);
+router.get('/view/list',jenkinsCtrl.getViewList);
+
+
 
 
 

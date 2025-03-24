@@ -1,6 +1,7 @@
 const { instance: jenkinsSer } = require('../services/jenkens.service');
 const check = require('../utils/param-check');
-const { defaultXml, generatePipelineXml } = require('../utils/xml');
+const pickTemplate = require('../template/create-template');
+// const { defaultXml, generatePipelineXml } = require('../utils/xml');
 
 async function getJenkinsinfo(req, res) {
 	try {
@@ -18,8 +19,8 @@ async function getBuildInfo(req, res) {
 		number: { type: 'number', integer: true },
 	};
 	const opts = req.query;
-	check(schema, opts);
 	try {
+		check(schema, opts);
 		const buildInfo = await jenkinsSer.getBuildInfo(opts);
 		res.json(buildInfo);
 	} catch (err) {
@@ -33,8 +34,8 @@ async function stopBuild(req, res) {
 		number: { type: 'number', integer: true },
 	};
 	const opts = req.body;
-	check(schema, opts);
 	try {
+		check(schema, opts);
 		await jenkinsSer.stopBuild(opts);
 		res.json({});
 	} catch (err) {
@@ -48,8 +49,8 @@ async function termBuild(req, res) {
 		number: { type: 'number', integer: true },
 	};
 	const opts = req.body;
-	check(schema, opts);
 	try {
+		check(schema, opts);
 		await jenkinsSer.termBuild(opts);
 		res.json({});
 	} catch (err) {
@@ -59,16 +60,15 @@ async function termBuild(req, res) {
 async function createJob(req, res) {
 	const schema = {
 		name: { type: 'string' },
-		xml: { type: 'string' },
+		type: { type: 'enum', values: ['flow', 'freestyle', 'matrix', 'multibranch'] },
 	};
 	const opts = req.body;
-	// const xml = generatePipelineXml();
-	if (!opts.xml) {
-		opts.xml = defaultXml;
-	}
-	check(schema, opts);
+
 	try {
-		await jenkinsSer.createJob(opts);
+		check(schema, opts);
+		const xml = await pickTemplate(opts.type);
+		console.log('picked xml %s', xml);
+		// await jenkinsSer.createJob(opts);
 		res.json({});
 	} catch (err) {
 		res.status(500).json({ error: err.message });
@@ -82,8 +82,8 @@ async function jobBuild(req, res) {
 		token: { type: 'string', optional: true },
 	};
 	const opts = req.body;
-	check(schema, opts);
 	try {
+		check(schema, opts);
 		const { name, parameters = {}, token = '' } = opts;
 		await jenkinsSer.jobBuild({ name, parameters, token });
 		res.json({});
@@ -97,8 +97,8 @@ async function getJobConfig(req, res) {
 		name: { type: 'string' },
 	};
 	const name = req.params;
-	check(schema, name);
 	try {
+		check(schema, name);
 		const config = await jenkinsSer.getJobConfig(name);
 		res.json(config);
 	} catch (err) {
@@ -111,8 +111,8 @@ async function getJobList(req, res) {
 		name: { type: 'string', optional: true },
 	};
 	const name = req.params;
-	check(schema, name);
 	try {
+		check(schema, name);
 		const list = await jenkinsSer.getJobList(name);
 		res.json(list);
 	} catch (err) {
@@ -125,8 +125,8 @@ async function getJobInfo(req, res) {
 		name: { type: 'string' },
 	};
 	const { name } = req.params;
-	check(schema, { name });
 	try {
+		check(schema, { name });
 		const config = await jenkinsSer.getJobInfo(name);
 		res.json(config);
 	} catch (err) {
@@ -139,8 +139,8 @@ async function checkExistsJob(req, res) {
 		name: { type: 'string' },
 	};
 	const name = req.params;
-	check(schema, name);
 	try {
+		check(schema, name);
 		const exists = await jenkinsSer.checkExistsJob(name);
 		res.json(exists);
 	} catch (err) {
@@ -153,8 +153,8 @@ async function deleteJob(req, res) {
 		name: { type: 'string' },
 	};
 	const name = req.params;
-	check(schema, name);
 	try {
+		check(schema, name);
 		await jenkinsSer.deleteJob(name);
 		res.json({});
 	} catch (err) {
@@ -169,8 +169,8 @@ async function updateEnableJob(req, res) {
 	};
 	const name = req.params;
 	const { enable } = req.body;
-	check(schema, { name, enable });
 	try {
+		check(schema, { name, enable });
 		await jenkinsSer.updateEnableJob(name, enable);
 		res.json({});
 	} catch (err) {
@@ -192,8 +192,8 @@ async function getItemInfo(req, res) {
 		id: { type: 'number' },
 	};
 	const { id } = req.params;
-	check(schema, { id });
 	try {
+		check(schema, { id });
 		const itemInfo = await jenkinsSer.getItemInfo(id);
 		res.json(itemInfo);
 	} catch (err) {
@@ -206,10 +206,42 @@ async function cancelItem(req, res) {
 		id: { type: 'number' },
 	};
 	const { id } = req.params;
-	check(schema, { id });
 	try {
+		check(schema, { id });
 		await jenkinsSer.cancelItem(id);
 		res.json({});
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+}
+
+async function getViewInfo(req, res) {
+	const schema = {
+		name: { type: 'string' },
+	};
+	const { name } = req.params;
+	try {
+		check(schema, { name });
+		const viewInfo = await jenkinsSer.getViewInfo(name);
+		res.json(viewInfo);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+}
+
+async function getViewList(req, res) {
+	try {
+		const list = await jenkinsSer.getViewList();
+		res.json(list);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+}
+
+async function getPluginList(req, res) {
+	try {
+		const list = await jenkinsSer.getPluginList();
+		res.json(list);
 	} catch (err) {
 		res.status(500).json({ error: err.message });
 	}
@@ -231,4 +263,7 @@ module.exports = {
 	getQueueList,
 	getItemInfo,
 	cancelItem,
+	getViewInfo,
+	getViewList,
+	getPluginList,
 };

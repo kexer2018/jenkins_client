@@ -120,6 +120,18 @@ class JenkinsClient extends EventEmitter {
 	async cancelItem(id) {
 		await this.jenkins.queue.cancel(id);
 	}
+
+	async getViewInfo(name) {
+		return await this.jenkins.view.get(name);
+	}
+
+	async getViewList() {
+		return await this.jenkins.view.list();
+	}
+
+	async getPluginList() {
+		return await this.jenkins.plugin.list();
+	}
 }
 
 module.exports = {
