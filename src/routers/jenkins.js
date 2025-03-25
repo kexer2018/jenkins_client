@@ -27,13 +27,7 @@ router.get('/queue/:id', jenkinsCtrl.getItemInfo);
 router.delete('/queue/:id', jenkinsCtrl.cancelItem);
 
 // view
-router.get('/view/:name',jenkinsCtrl.getViewInfo);
-router.get('/view/list',jenkinsCtrl.getViewList);
-
-
-
-
-
-
+router.get('/view/:name', jenkinsCtrl.getViewInfo);
+router.get('/view/list', jenkinsCtrl.getViewList);
 
 module.exports = router;

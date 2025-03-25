@@ -1,7 +1,6 @@
 const { instance: jenkinsSer } = require('../services/jenkens.service');
 const check = require('../utils/param-check');
-const pickTemplate = require('../template/create-template');
-// const { defaultXml, generatePipelineXml } = require('../utils/xml');
+const XmlGenerator = require('../utils/gen/base');
 
 async function getJenkinsinfo(req, res) {
 	try {
@@ -61,16 +60,18 @@ async function createJob(req, res) {
 	const schema = {
 		name: { type: 'string' },
 		type: { type: 'enum', values: ['flow', 'freestyle', 'matrix', 'multibranch'] },
+		config: { type: 'object' },
 	};
 	const opts = req.body;
 
 	try {
 		check(schema, opts);
-		const xml = await pickTemplate(opts.type);
-		console.log('picked xml %s', xml);
-		// await jenkinsSer.createJob(opts);
+		const generator = new XmlGenerator(opts);
+		opts.xml = generator.generateXML();
+		await jenkinsSer.createJob(opts);
 		res.json({});
 	} catch (err) {
+		console.error('error', err.stack);
 		res.status(500).json({ error: err.message });
 	}
 }

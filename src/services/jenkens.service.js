@@ -94,6 +94,9 @@ class JenkinsClient extends EventEmitter {
 	}
 
 	async createJob(opts) {
+		if (!opts.xml) {
+			throw new Error('Job XML is required');
+		}
 		await this.jenkins.job.create(opts.name, opts.xml);
 	}
 
