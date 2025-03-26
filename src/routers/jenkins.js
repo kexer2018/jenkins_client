@@ -2,9 +2,6 @@ const { Router } = require('express');
 const router = Router();
 const jenkinsCtrl = require('../controllers/jenkins.controller');
 
-// plugin
-router.get('/plugin/list', jenkinsCtrl.getPluginList);
-
 // build
 router.get('/info', jenkinsCtrl.getJenkinsinfo);
 router.get('/build/info', jenkinsCtrl.getBuildInfo);

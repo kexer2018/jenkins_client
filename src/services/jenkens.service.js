@@ -93,11 +93,11 @@ class JenkinsClient extends EventEmitter {
 		return name ? await this.jenkins.job.list(name) : await this.jenkins.job.list();
 	}
 
-	async createJob(opts) {
-		if (!opts.xml) {
+	async createJob(name, xml) {
+		if (!xml) {
 			throw new Error('Job XML is required');
 		}
-		await this.jenkins.job.create(opts.name, opts.xml);
+		await this.jenkins.job.create(name, xml);
 	}
 
 	async checkExistsJob(name) {

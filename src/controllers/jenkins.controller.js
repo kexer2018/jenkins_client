@@ -1,6 +1,6 @@
 const { instance: jenkinsSer } = require('../services/jenkens.service');
 const check = require('../utils/param-check');
-const XmlGenerator = require('../utils/gen/base');
+const BaseGenerator = require('../utils/generator');
 
 async function getJenkinsinfo(req, res) {
 	try {
@@ -66,9 +66,22 @@ async function createJob(req, res) {
 
 	try {
 		check(schema, opts);
-		const generator = new XmlGenerator(opts);
-		opts.xml = generator.generateXML();
-		await jenkinsSer.createJob(opts);
+		const pluginList = await jenkinsSer.getPluginList();
+		const plugins = pluginList
+			.filter((item) => item.active)
+			.reduce((acc, item) => {
+				acc[item.shortName] = `${item.shortName}@${item.version}`;
+				return acc;
+			}, {});
+
+		const generator = new BaseGenerator({
+			type: opts.type,
+			config: opts.config,
+			plugins,
+		});
+
+		const xml = generator.generateXML();
+		await jenkinsSer.createJob(opts.name, xml);
 		res.json({});
 	} catch (err) {
 		console.error('error', err.stack);
@@ -239,15 +252,6 @@ async function getViewList(req, res) {
 	}
 }
 
-async function getPluginList(req, res) {
-	try {
-		const list = await jenkinsSer.getPluginList();
-		res.json(list);
-	} catch (err) {
-		res.status(500).json({ error: err.message });
-	}
-}
-
 module.exports = {
 	getJenkinsinfo,
 	getBuildInfo,
@@ -266,5 +270,4 @@ module.exports = {
 	cancelItem,
 	getViewInfo,
 	getViewList,
-	getPluginList,
 };
