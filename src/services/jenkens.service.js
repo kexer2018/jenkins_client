@@ -1,18 +1,30 @@
 const { EventEmitter } = require('events');
 const Jenkins = require('jenkins');
-const { JENKINS_URL } = require('../config/env');
+const { JENKINS_SERVICE_URL } = require('../config/env');
+const { JobGeneratorFactory, PluginManager, ScriptManager } = require('../utils/generator');
 
 class JenkinsClient extends EventEmitter {
-	constructor(url = JENKINS_URL) {
+	constructor(URL = JENKINS_SERVICE_URL) {
 		super();
-		if (!url) {
-			throw new Error('Jenkins URL is required');
-		}
+		if (!URL) throw new Error('Jenkins URL is required');
 
 		this.jenkins = new Jenkins({
-			baseUrl: url,
+			baseUrl: URL,
 			crumbIssuer: true,
 		});
+
+		this.pluginManager = new PluginManager(this.jenkins);
+	}
+
+	/**
+	 * 生成 XML 配置
+	 * @param {string} type - 任务类型 (freestyle, flow, multibranch)
+	 * @param {object} config - 任务配置
+	 * @returns {Promise<string>} - 生成的 XML 字符串
+	 */
+	async generateJobXML(type, config) {
+		const generator = JobGeneratorFactory.createGenerator(type, config, this.pluginManager);
+		return await generator.generateXML();
 	}
 
 	async getJenkinsinfo() {
@@ -59,7 +71,6 @@ class JenkinsClient extends EventEmitter {
 			console.log('[END] Log Stream Ended');
 			this.emit('end');
 		});
-
 		return logger;
 	}
 
@@ -93,10 +104,11 @@ class JenkinsClient extends EventEmitter {
 		return name ? await this.jenkins.job.list(name) : await this.jenkins.job.list();
 	}
 
-	async createJob(name, xml) {
-		if (!xml) {
-			throw new Error('Job XML is required');
-		}
+	async createJob(opts) {
+		const { name, type, config } = opts;
+		// const scriptManager = new ScriptManager(config);
+		// scriptManager.getConfig();
+		const xml = await this.generateJobXML(type, config);
 		await this.jenkins.job.create(name, xml);
 	}
 
@@ -130,10 +142,6 @@ class JenkinsClient extends EventEmitter {
 
 	async getViewList() {
 		return await this.jenkins.view.list();
-	}
-
-	async getPluginList() {
-		return await this.jenkins.plugin.list();
 	}
 }
 

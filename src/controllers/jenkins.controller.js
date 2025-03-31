@@ -1,6 +1,5 @@
 const { instance: jenkinsSer } = require('../services/jenkens.service');
 const check = require('../utils/param-check');
-const BaseGenerator = require('../utils/generator');
 
 async function getJenkinsinfo(req, res) {
 	try {
@@ -66,22 +65,7 @@ async function createJob(req, res) {
 
 	try {
 		check(schema, opts);
-		const pluginList = await jenkinsSer.getPluginList();
-		const plugins = pluginList
-			.filter((item) => item.active)
-			.reduce((acc, item) => {
-				acc[item.shortName] = `${item.shortName}@${item.version}`;
-				return acc;
-			}, {});
-
-		const generator = new BaseGenerator({
-			type: opts.type,
-			config: opts.config,
-			plugins,
-		});
-
-		const xml = generator.generateXML();
-		await jenkinsSer.createJob(opts.name, xml);
+		await jenkinsSer.createJob(opts);
 		res.json({});
 	} catch (err) {
 		console.error('error', err.stack);
